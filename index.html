@@ -160,10 +160,11 @@
     <script type="text/javascript">
       
       (function(){
-        /* 全局变量 
-         * attack_records
-         * attack_nodes
-         * attack_lines
+        /* 
+         * 全局变量 
+         * attack_records 后端传入
+         * attack_nodes 本地定义
+         * attack_lines 本地定义
          */
         // console.log(attack_records);
         var attack_nodes=[
@@ -181,26 +182,51 @@
               [41, 51],[41, 52],[41, 53],[42, 52],[42, 53],[43, 52],
               [52, 61],[52, 62],[52, 63],[52, 64],[52, 65]
             ];
-        /* 画图
-         *
+        /* 
+         * 画攻击路径（线）和攻击节点（圆）
          */
         var canvas = document.getElementById("attack-canvas");
         var ctx = canvas.getContext("2d");
 
-        // 攻击路径的列数
+        // 列数
         var col=attack_nodes.length;
-        // 攻击路径的最大“行数”
+        // 最大“行数”
         var row_max=0;
         attack_nodes.forEach(function(ele){
             if(ele.length>row_max){
               row_max=ele.length;
             }
         });
-        /* 确定位置函数：页面载入和宽高变化时调用
-         *
-         */
-        var drawPos=function(){
 
+        /* 
+         * 画线和圆函数draw：页面载入和宽高变化时调用
+         */
+        var drawPos=function(obj){
+          // 清除画布
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+
+          var paths=obj.path;
+          // 生成要显示的节点组成的数组
+          var nodes_onpath=[];
+          paths.forEach(function(arrs){
+            arrs.forEach(function(ele){
+              if(nodes_onpath.indexOf(ele)==-1){
+                nodes_onpath.push(ele)
+              }
+            })
+          })
+          // console.log(nodes_onpath);
+
+          // 生成要显示的线组成的数组
+          var lines_onpath=[];
+          paths.forEach(function(arrs){
+            for(var i=0;i<arrs.length-1;i++){
+              lines_onpath.push([arrs[i],arrs[i+1]]);
+            }
+          });
+          // console.log(lines_onpath);
+
+          // 获得canvas的宽和高
           var width=canvas.width*0.8,
               height=canvas.height*0.8;
           // console.log('canvas的宽和高分别为：',width,height)
@@ -211,22 +237,34 @@
               r=(Math.min(col_piece,row_max_piece)/2)*0.8;
           // console.log("每一份宽为:",col_piece);
 
-          // 画节点
-          ctx.fillStyle="#ff7676";
+          /*
+           * 画圆
+           */
           // 设置一个变量关联节点和节点坐标
           var nodes_pos=[];
+
           for(var i=0;i<attack_nodes.length;i++){
             var row_piece=height/(attack_nodes[i].length+1);
             // console.log("每一份高为:",row_piece);
+
             for(var j=0;j<attack_nodes[i].length;j++){
-              
+              // 构造关联节点和节点坐标的数组
               var key=(i+1)+""+(j+1);
-              // console.log(key);
               var x=col_piece*(i+1);
               var y=row_piece*(j+1);
               var pos=[x,y]
               nodes_pos.push({'key':key,'pos':pos});
               
+              // console.log(key,nodes_onpath);
+              // 不显示的节点设置为透明色
+              if(nodes_onpath.indexOf(parseInt(key))!=-1){
+                ctx.fillStyle="#ff7676";
+                // debugger;
+              }
+              else{
+                ctx.fillStyle="rgba(225,225,225,0)";
+              }
+              // 画圆
               ctx.beginPath();
               ctx.arc(x,y,r,0,2*Math.PI);
               ctx.fill();
@@ -234,45 +272,50 @@
             }
           }
           console.log("draw point over");
-          // console.log(pos);
-          // pos.forEach(function(ele){
-          //   console.log(ele)
-          // })
-          // debugger;
 
           // 画线
+          ctx.beginPath();
           for(var i=0;i<attack_lines.length;i++){
 
-            var start=attack_lines[i][0],
-                end=attack_lines[i][1],
-                s_pos,e_pos;
-            console.log("起点和终点分别是",start,end);
-
-            nodes_pos.forEach(function(ele){
-              console.log(ele.key);
-              // debugger;
-              if(start==ele['key']){
-                s_pos=ele.pos;
-                // console.log(s_pos);
-                // debugger;
+            // 过滤掉不显示的线
+            var isInclude=false;
+            lines_onpath.forEach(function(ele){
+              // console.log(ele[0],ele[1],attack_lines[i][0],attack_lines[i][1]);
+              if(ele[0]==attack_lines[i][0]&&ele[1]==attack_lines[i][1]){
+                isInclude=true;
               }
-              if(end==ele['key']){
-                e_pos=ele.pos;
-              }
-              // console.log(s_pos,e_pos);
             })
-            
-            
-            // console.log(pos['11']);
-            // console.log('起点坐标',pos['13'],s_pos[1]);
-            // console.log('终点坐标',pos[end+''][0],e_pos[1]);
-            ctx.moveTo(s_pos[0],s_pos[1]);
-            ctx.lineTo(e_pos[0],e_pos[1]);
+            // console.log(isInclude);
+            // debugger;
+            if(isInclude){
+              // [11,21]-->{'key':11,'pos':[x1,x2]}
+              var start=attack_lines[i][0],
+                  end=attack_lines[i][1],
+                  s_pos,e_pos;
+              console.log("起点和终点分别是",start,end);
+
+              nodes_pos.forEach(function(ele){
+                // console.log(ele['key']);
+                if(start==ele['key']){
+                  s_pos=ele.pos;
+                }
+                if(end==ele['key']){
+                  e_pos=ele.pos;
+                }
+              })
+
+              // console.log(s_pos[0],s_pos[1],e_pos[0],e_pos[1])
+              ctx.moveTo(s_pos[0],s_pos[1]);
+              ctx.lineTo(e_pos[0],e_pos[1]);
+            }
           }
           ctx.strokeStyle='#e0e0e0';
           ctx.stroke();
+          ctx.closePath();
+          console.log("draw line over");
         }
-        drawPos();
+        // drawPos(attack_records[14]);
+        drawPos(attack_records[16]);
       })()
     </script>
   </body>

@@ -130,7 +130,7 @@ var attack_records=[
             "path": [
                 [
                     52,
-                    65
+                    64
                 ]
             ]
         },
