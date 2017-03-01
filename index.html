@@ -30,20 +30,11 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
       <![endif]-->
     <style type="text/css">
-      /*.placeholders{
-        position: relative;
-      }*/
       #attack-canvas{
         height: 100%;
         width: 80%;
         margin:0px 10%;
-        /*background-color: red;*/
       }
-      /*.text{
-        z-index: 100px;
-        position: absolute;
-        font-size: 12px;
-      }*/
     </style>
   </head>
   <body>
@@ -83,39 +74,11 @@
         <div class="row">
           <div class="col-sm-3 col-md-2 sidebar">
             <ul class="nav nav-sidebar" id="ip-list">
-              <!-- <li class="active"><a href="#">Overview </a></li>
-              <li><a href="#">Reports</a></li>
-              <li><a href="#">Analytics</a></li>
-              <li><a href="#">Export</a></li> -->
             </ul>
-
           </div>
           <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <h1 class="page-header">Dashboard</h1>
             <canvas id="attack-canvas" width="960px" height="540px"></canvas>
-            <!-- <div class="row placeholders">
-              <div class="col-xs-6 col-sm-3 placeholder">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
-                <h4>Label</h4>
-                <span class="text-muted">Something else</span>
-              </div>
-              <div class="col-xs-6 col-sm-3 placeholder">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
-                <h4>Label</h4>
-                <span class="text-muted">Something else</span>
-              </div>
-              <div class="col-xs-6 col-sm-3 placeholder">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
-                <h4>Label</h4>
-                <span class="text-muted">Something else</span>
-              </div>
-              <div class="col-xs-6 col-sm-3 placeholder">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
-                <h4>Label</h4>
-                <span class="text-muted">Something else</span>
-              </div>
-            </div> -->
-
             <h2 class="sub-header">Section title</h2>
             <div class="table-responsive">
               <table class="table table-striped">
@@ -126,23 +89,11 @@
                     <th>Header</th>
                     <th>Header</th>
                     <th>Header</th>
+                    <th>Header</th>
+                    <th>Header</th>
                   </tr>
                 </thead>
-                <tbody id="">
-                  <tr>
-                    <td>1,001</td>
-                    <td>Lorem</td>
-                    <td>ipsum</td>
-                    <td>dolor</td>
-                    <td>sit</td>
-                  </tr>
-                  <tr>
-                    <td>1,015</td>
-                    <td>sodales</td>
-                    <td>ligula</td>
-                    <td>in</td>
-                    <td>libero</td>
-                  </tr>
+                <tbody id="path-tabel">
                 </tbody>
               </table>
             </div>
@@ -262,6 +213,8 @@
             var aEle=document.createElement('a')
             aEle.href="#";
             aEle.innerText=ele.ip;
+            // 给ip绑定点击事件，点击后改变canvas图和table列表内容
+            aEle.onclick=selectIpHandler;
             liEle.appendChild(aEle);
             ulEle.appendChild(liEle);
           })
@@ -402,12 +355,91 @@
           ctx.closePath();
           console.log("draw line over");
         }
-        function createAttackPath(){
+        function createAttackPath(ipObj){
+          // 获得tbody元素
+          var tBodyEle=document.getElementById('path-tabel');
+          // 清空tbody内容
+          tBodyEle.innerHTML='';
 
+          // 获得tbody下所有tr元素
+          // var trEle=tBodyEle.children;
+          // console.log(trEle);
+
+          // remove掉所有子元素
+          // for(var i=trEle.length-1;i>=0;i--){
+          //   tBodyEle.removeChild(trEle[i]);
+          // }
+
+          // <tr>
+          //   <td>1,001</td>
+          //   <td>暴力破解</td>
+          //   <td>心脏滴血攻击</td>
+          //   <td>远程代码执行</td>
+          //   <td>文件包含</td>
+          //   <td>远程代码执行</td>
+          //   <td>文件包含</td>
+          // </tr>
+
+          // {
+          //   "ip": "140.255.144.166",
+          //   "path": [ 
+          //     [ 11, 21, 35, 43, 52, 61 ],
+          //     [ 11, 21, 35, 43, 52, 64 ]
+          //   ]
+          // }
+
+          // 构建tbody内容
+          var paths=ipObj.path;
+          for(var i=0;i<paths.length;i++){
+            var trEle=document.createElement('tr');
+            // for(var j=0;j<8;j++){
+            for(var j=0;j<paths[i].length+1;j++){
+              var tdEle=document.createElement('td');
+              // 如果是第一列
+              if(j==0){
+                // 如果是第一行的第一列，值为ip
+                if(i==0){
+                  tdEle.innerText=ipObj.ip;
+                // 不是第一行的第一列，值为空
+                }else{
+                  tdEle.innerText='';
+                }
+              // 不是第一列
+              }else{
+                // paths[i][j-1]如果存在
+                if(paths[i][j-1]){
+                  // debugger;
+                  tdEle.innerText=getTextFromId(paths[i][j-1]);
+                  // debugger;
+                // paths[i][j-1]如果不存在，赋值为空
+                }else{
+                  tdEle.innerText='';
+                } 
+              }
+              trEle.appendChild(tdEle);
+            }
+            tBodyEle.appendChild(trEle);
+          }
         }
         // 选中某一ip后的处理函数
-        function selectIpHandler(ip){
-          // 由传入的ip与attack_records比对，返回该ip和其path组成的obj
+        function selectIpHandler(event){
+          event.preventDefault;
+          event.stopPropagation;
+
+          // 清除active样式
+          clearActive();
+
+          // 获得事件源
+          var target=event.target;
+
+          // 增加active样式
+          target.parentNode.className='active';
+
+          // 获得ip值
+          var ip=target.innerText;
+          console.log('当前选中ip为',ip);
+
+          // 由ip与attack_records比对，返回该ip和其path组成的obj
           var ipObj;
           attack_records.forEach(function(obj){
             if(obj.ip==ip){
@@ -430,8 +462,29 @@
           // 画圆
           drawShowNodes(showNodes);
 
+          // 生成攻击路径列表
+          createAttackPath(ipObj)
         }
-        selectIpHandler('140.255.144.166');
+
+        function getTextFromId(id){
+          var text=''
+          attack_nodes.forEach(function(arr){
+            arr.forEach(function(obj){
+              if(obj.id==id){
+                text=obj.text;  
+              }
+            })
+          })
+          return text;
+        }
+        function clearActive(){
+          var ulEle=document.getElementById('ip-list');
+          var liEles=ulEle.children;
+          console.log(liEles);
+          for(var i=0;i<liEles.length;i++){
+            liEles[i].className='';
+          }
+        }
       })()
     </script>
   </body>
