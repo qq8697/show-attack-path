@@ -30,20 +30,20 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
       <![endif]-->
     <style type="text/css">
-      .placeholders{
+      /*.placeholders{
         position: relative;
-      }
+      }*/
       #attack-canvas{
         height: 100%;
-        width: 60%;
-        margin:0px auto;
+        width: 80%;
+        margin:0px 10%;
         /*background-color: red;*/
       }
-      .text{
+      /*.text{
         z-index: 100px;
         position: absolute;
         font-size: 12px;
-      }
+      }*/
     </style>
   </head>
   <body>
@@ -82,44 +82,40 @@
       <div class="container-fluid">
         <div class="row">
           <div class="col-sm-3 col-md-2 sidebar">
-            <ul class="nav nav-sidebar">
-              <li class="active"><a href="#">Overview </a></li>
+            <ul class="nav nav-sidebar" id="ip-list">
+              <!-- <li class="active"><a href="#">Overview </a></li>
               <li><a href="#">Reports</a></li>
               <li><a href="#">Analytics</a></li>
-              <li><a href="#">Export</a></li>
+              <li><a href="#">Export</a></li> -->
             </ul>
 
           </div>
           <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <h1 class="page-header">Dashboard</h1>
+            <canvas id="attack-canvas" width="960px" height="540px"></canvas>
+            <!-- <div class="row placeholders">
+              <div class="col-xs-6 col-sm-3 placeholder">
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
+                <h4>Label</h4>
+                <span class="text-muted">Something else</span>
+              </div>
+              <div class="col-xs-6 col-sm-3 placeholder">
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
+                <h4>Label</h4>
+                <span class="text-muted">Something else</span>
+              </div>
+              <div class="col-xs-6 col-sm-3 placeholder">
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
+                <h4>Label</h4>
+                <span class="text-muted">Something else</span>
+              </div>
+              <div class="col-xs-6 col-sm-3 placeholder">
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
+                <h4>Label</h4>
+                <span class="text-muted">Something else</span>
+              </div>
+            </div> -->
 
-            <div class="row placeholders">
-            <canvas id="attack-canvas" width="960px" height="540px">
-              <!-- <div class="col-xs-6 col-sm-3 placeholder">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
-                <h4>Label</h4>
-                <span class="text-muted">Something else</span>
-              </div>
-              <div class="col-xs-6 col-sm-3 placeholder">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
-                <h4>Label</h4>
-                <span class="text-muted">Something else</span>
-              </div>
-              <div class="col-xs-6 col-sm-3 placeholder">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
-                <h4>Label</h4>
-                <span class="text-muted">Something else</span>
-              </div>
-              <div class="col-xs-6 col-sm-3 placeholder">
-                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" class="img-responsive" alt="Generic placeholder thumbnail" height="200" width="200">
-                <h4>Label</h4>
-                <span class="text-muted">Something else</span>
-              </div> -->
-              </canvas>
-            </div>
-            
-              
-            
             <h2 class="sub-header">Section title</h2>
             <div class="table-responsive">
               <table class="table table-striped">
@@ -132,7 +128,7 @@
                     <th>Header</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="">
                   <tr>
                     <td>1,001</td>
                     <td>Lorem</td>
@@ -176,6 +172,8 @@
          * attack_records 后端传入
          * attack_nodes 本地定义
          * attack_lines 本地定义
+         * canvas和ctx 
+         * r
          */
         // console.log(attack_records);
         var attack_nodes=[
@@ -193,66 +191,45 @@
               [41, 51],[41, 52],[41, 53],[42, 52],[42, 53],[43, 52],
               [52, 61],[52, 62],[52, 63],[52, 64],[52, 65]
             ];
-        /* 
-         * 画攻击路径（线）和攻击节点（圆）
-         */
+
+        // 创建画布和渲染上下文
         var canvas = document.getElementById("attack-canvas");
         var ctx = canvas.getContext("2d");
 
-        // 列数
-        var col=attack_nodes.length;
-        // 最大“行数”
-        var row_max=0;
-        attack_nodes.forEach(function(ele){
-            if(ele.length>row_max){
-              row_max=ele.length;
-            }
-        });
+        // 给attack_nodes[i][j]即{'id':11,'text':'端口扫描'}添加pos属性，返回半径r
+        // 该属性由canvas宽高和横向纵向项目个数计算而来
+        // 用于后续画圆和画线
+        var r=addPosProp();
+        
+        // 生成ip列表
+        createIpList(attack_records);
 
-        /* 
-         * 画线和圆函数draw：页面载入和宽高变化时调用
-         */
-        var drawPos=function(obj){
-          // 清除画布
-          ctx.clearRect(0,0,canvas.width,canvas.height);
+        // 画出所有的节点
+        drawAllNodes(attack_nodes);
 
-          var paths=obj.path;
-          // 生成要显示的节点组成的数组
-          var nodes_onpath=[];
-          paths.forEach(function(arrs){
-            arrs.forEach(function(ele){
-              if(nodes_onpath.indexOf(ele)==-1){
-                nodes_onpath.push(ele)
+
+        function addPosProp(){
+          // 列数
+          var col=attack_nodes.length;
+          // 最大“行数”
+          var row_max=0;
+          attack_nodes.forEach(function(ele){
+              if(ele.length>row_max){
+                row_max=ele.length;
               }
-            })
-          })
-          // console.log(nodes_onpath);
-
-          // 生成要显示的线组成的数组
-          var lines_onpath=[];
-          paths.forEach(function(arrs){
-            for(var i=0;i<arrs.length-1;i++){
-              lines_onpath.push([arrs[i],arrs[i+1]]);
-            }
           });
-          // console.log(lines_onpath);
 
           // 获得canvas的宽和高
           var width=canvas.width,
               height=canvas.height;
-          // console.log('canvas的宽和高分别为：',width,height)
+          console.log('canvas的宽和高分别为：',$(canvas).width(),$(canvas).height());
+          console.log('canvas的父元素宽和高分别为：',$(canvas).parent().width(),$(canvas).parent().height());
 
           // 设置半径
           var col_piece=width/(col+1),
               row_max_piece=height/(row_max+1),
               r=(Math.min(col_piece,row_max_piece)/2)*0.8;
           // console.log("每一份宽为:",col_piece);
-
-          /*
-           * 画圆
-           */
-          // 设置一个变量关联节点和节点坐标
-          // var nodes_pos=[];
 
           for(var i=0;i<attack_nodes.length;i++){
             var row_piece=height/(attack_nodes[i].length+1);
@@ -262,46 +239,134 @@
               // console.log(attack_nodes[i][j]);
               // Object {id: 11, text: "端口扫描"}
               
-              // 构造关联节点和节点坐标的数组
-              // var key=(i+1)+""+(j+1);
+              // 给attack_nodes[i][j]添加pos属性
               var x=col_piece*(i+1);
               var y=row_piece*(j+1);
-              var pos=[x,y]
-              // nodes_pos.push({'key':key,'pos':pos});
+              var pos=[x,y];
               attack_nodes[i][j].pos=pos;
+            }
+          }
+          // 返回半径
+          return r;
+        }
+        function createIpList(data){
+          // <ul class="nav nav-sidebar ip-list">
+          //     <li class="active"><a href="#">Overview </a></li>
 
-              // 给节点添加文本（添加到canvas的父元素上）
-              // var text=$('<div class="text">');
-              // text.text(attack_nodes[i][j].text);
-              // text.css({'left':attack_nodes[i][j].pos[0],'top':attack_nodes[i][j].pos[1]});
-              // text.css('opacity',1);
-              // $(canvas).parent().append(text);
+          // 获得父ul元素对象
+          var ulEle=document.getElementById('ip-list');
+          // console.log(ulEle);
+          // 循环生成子li元素
+          data.forEach(function(ele){
+            var liEle=document.createElement('li');
+            var aEle=document.createElement('a')
+            aEle.href="#";
+            aEle.innerText=ele.ip;
+            liEle.appendChild(aEle);
+            ulEle.appendChild(liEle);
+          })
+          // console.log(ulEle);
+        }
+        function drawAllNodes(){
 
-              // console.log(key,nodes_onpath);
+          for(var i=0;i<attack_nodes.length;i++){
+            for(var j=0;j<attack_nodes[i].length;j++){
+              var x=attack_nodes[i][j].pos[0];
+              var y=attack_nodes[i][j].pos[1];
+
+              // 画圆
+              drawArc(x,y,r,'#428bca')
+
+              // 绘制文本
+              drawText(x,y,attack_nodes[i][j].text,'#000000')
+
+            }
+          }
+        }
+        function drawArc(x,y,r,color){
+          // 画圆
+          ctx.beginPath();
+          ctx.arc(x,y,r,0,2*Math.PI);
+          ctx.fillStyle=color;
+          ctx.fill();
+          ctx.closePath();
+        }
+        function drawText(x,y,text,color){
+          // 绘制文本
+          ctx.font = "12px serif";
+          ctx.textAlign='center';
+          ctx.textBaseline = 'middle';
+
+          ctx.fillStyle=color;
+          ctx.fillText(text, x, y);
+        }
+        function getShowNodes(ipObj){
+          // {
+          //   "ip": "140.255.144.166",
+          //   "path": [ 
+          //     [ 11, 21, 35, 43, 52, 61 ],
+          //     [ 11, 21, 35, 43, 52, 64 ]
+          //   ]
+          // }
+          var paths=ipObj.path;
+          var showNodes=[];
+          paths.forEach(function(arrs){
+            arrs.forEach(function(ele){
+              if(showNodes.indexOf(ele)==-1){
+                showNodes.push(ele)
+              }
+            })
+          })
+          // console.log(showNodes);
+          return showNodes.sort();
+        }
+        function getShowLines(ipObj){
+          var paths=ipObj.path;
+          var showLines=[];
+          paths.forEach(function(arrs){
+            for(var i=0;i<arrs.length-1;i++){
+              // TODO1 去重
+              showLines.push([arrs[i],arrs[i+1]]);
+            }
+          });
+          // console.log(lines_onpath);
+          return showLines;
+        }
+        function drawShowNodes(arr){
+          // TODO2 合并drawShowNodes和drawAllNodes
+
+          for(var i=0;i<attack_nodes.length;i++){
+            for(var j=0;j<attack_nodes[i].length;j++){
+              var x=attack_nodes[i][j].pos[0];
+              var y=attack_nodes[i][j].pos[1];
+
               // 不显示的节点设置为透明色
-              if(nodes_onpath.indexOf(parseInt(attack_nodes[i][j].id))!=-1){
-                ctx.fillStyle="#ff7676";
-                // debugger;
+              var nodeColor,textColor;
+              if(arr.indexOf(parseInt(attack_nodes[i][j].id))!=-1){
+                nodeColor="#ff7676";
+                textColor='#000000'
               }
               else{
-                ctx.fillStyle="rgba(225,225,225,0)";
+                nodeColor="rgba(225,225,225,0)";
+                textColor="rgba(225,225,225,0)"
               }
               // 画圆
-              ctx.beginPath();
-              ctx.arc(x,y,r,0,2*Math.PI);
-              ctx.fill();
-              ctx.closePath();
+              drawArc(x,y,r,nodeColor)
+
+              // 绘制文本
+              drawText(x,y,attack_nodes[i][j].text,textColor)
             }
           }
           console.log("draw point over");
-
+        }
+        function drawShowLines(arr){
           // 画线
           ctx.beginPath();
-          for(var i=0;i<attack_lines.length;i++){
 
+          for(var i=0;i<attack_lines.length;i++){
             // 过滤掉不显示的线
             var isInclude=false;
-            lines_onpath.forEach(function(ele){
+            arr.forEach(function(ele){
               // console.log(ele[0],ele[1],attack_lines[i][0],attack_lines[i][1]);
               if(ele[0]==attack_lines[i][0]&&ele[1]==attack_lines[i][1]){
                 isInclude=true;
@@ -310,7 +375,6 @@
             // console.log(isInclude);
 
             if(isInclude){
-              // [11,21]-->{'key':11,'pos':[x1,x2]}
               var start=attack_lines[i][0],
                   end=attack_lines[i][1],
                   s_pos,e_pos;
@@ -326,9 +390,7 @@
                     e_pos=ele.pos;
                   }
                 })
-                
               })
-              // debugger;
               // console.log(s_pos[0],s_pos[1],e_pos[0],e_pos[1]);
 
               ctx.moveTo(s_pos[0],s_pos[1]);
@@ -340,8 +402,36 @@
           ctx.closePath();
           console.log("draw line over");
         }
-        // drawPos(attack_records[18]);
-        drawPos(attack_records[16]);
+        function createAttackPath(){
+
+        }
+        // 选中某一ip后的处理函数
+        function selectIpHandler(ip){
+          // 由传入的ip与attack_records比对，返回该ip和其path组成的obj
+          var ipObj;
+          attack_records.forEach(function(obj){
+            if(obj.ip==ip){
+              ipObj=obj;
+            }
+          })
+
+          // 清除画布
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+
+          // 获得要显示的线
+          var showLines=getShowLines(ipObj);
+
+          // 画线（先画线后画圆）
+          drawShowLines(showLines);
+
+          // 获得要显示的节点
+          var showNodes=getShowNodes(ipObj);
+
+          // 画圆
+          drawShowNodes(showNodes);
+
+        }
+        selectIpHandler('140.255.144.166');
       })()
     </script>
   </body>
